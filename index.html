@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Resume Builder</title>
+
+  <!-- External libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
+   <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <h2>ResumePro</h2>
+    <ul>
+      <li><a href="#" onclick="switchSection('builder')">Resume Builder</a></li>
+      <li><a href="#" onclick="switchSection('samples')">Sample Resumes</a></li>
+      <li><a href="#" onclick="switchSection('roadmaps')">Job Roadmaps</a></li>
+    </ul>
+  </nav>
+
+  <h1>Interactive Resume Builder</h1>
+
+  <div class="main-container">
+    <form id="resumeForm" autocomplete="off" spellcheck="false">
+      <label for="name">Full Name *</label>
+      <input type="text" id="name" required />
+
+      <label for="email">Email *</label>
+      <input type="email" id="email" required />
+
+      <label for="phone">Phone Number *</label>
+      <input type="tel" id="phone" required />
+
+      <label for="college">College/University *</label>
+      <input type="text" id="college" required />
+
+      <label for="summary">Professional Summary *</label>
+      <textarea id="summary" rows="4" required></textarea>
+
+      <label for="skills">Skills (comma separated) *</label>
+      <input type="text" id="skills" required />
+
+      <label for="projectLinks">Project Links (comma separated)</label>
+      <input type="text" id="projectLinks" />
+
+      <label for="projectDescriptions">Project Descriptions (separate with "|||")</label>
+      <textarea id="projectDescriptions" rows="3"></textarea>
+
+      <button type="submit">Generate Resume</button>
+      <button type="reset">Clear Form</button>
+    </form>
+
+    <section id="resumePreview" aria-live="polite" aria-atomic="true"></section>
+  </div>
+
+  <div id="actionButtons">
+    <button onclick="saveToLocalStorage()">Save</button>
+    <button onclick="loadFromLocalStorage()">Load</button>
+    <button onclick="exportPDF()">Export as PDF</button>
+  </div>
+
+  <div class="container" id="samples">
+    <div class="sample">
+      <h3>Software Engineer Resume</h3>
+      <p>Experienced in full-stack development with proficiency in JavaScript, React, Node.js, and MongoDB.</p>
+    </div>
+    <div class="sample">
+      <h3>Data Analyst Resume</h3>
+      <p>Skilled in SQL, Python, Tableau, and Excel. Adept at extracting insights from data and visualizing results.</p>
+    </div>
+  </div>
+
+  <div class="container" id="roadmaps">
+    <div class="roadmap">
+      <h3>Frontend Developer Roadmap</h3>
+      <ul>
+        <li>HTML, CSS, JavaScript basics</li>
+        <li>Responsive design & Flexbox/Grid</li>
+        <li>React or Vue.js</li>
+        <li>Version control (Git & GitHub)</li>
+      </ul>
+    </div>
+    <div class="roadmap">
+      <h3>Machine Learning Engineer Roadmap</h3>
+      <ul>
+        <li>Python programming</li>
+        <li>Math for ML (Linear Algebra, Stats)</li>
+        <li>scikit-learn, TensorFlow, PyTorch</li>
+        <li>Projects & Kaggle Competitions</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+   </body>
+</html>
