@@ -137,11 +137,11 @@
 
     /* Resume preview styles */
     #resumePreview {
-      background: white;
+      background: rgb(16, 15, 15);
       padding: 30px 40px;
       border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-      color: #222;
+      color: #a4a2a2;
       line-height: 1.5;
       flex: 1 1 50%;
       max-width: 600px;

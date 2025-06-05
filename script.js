@@ -153,4 +153,22 @@
         console.error(error);
       }
     }
+//used to  make the pattern of the number
+ form.phone.addEventListener('input', () => {
+    form.phone.value = form.phone.value.replace(/\D/g, ''); // digits only
+    if (form.phone.value.length !== 10) {
+      form.phone.setCustomValidity('Phone number must be exactly 10 digits.');
+    } else {
+      form.phone.setCustomValidity('');
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    if (form.phone.value.length !== 10) {
+      form.phone.setCustomValidity('Phone number must be exactly 10 digits.');
+      form.reportValidity(); // show error
+      return;
+    }
+    form.phone.setCustomValidity('');
+  });
  

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dynamic Resume Builder</title>
+
+  <!-- External libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7f8;
+      margin: 0; padding: 0;
+      color: #333;
+    }
+    nav {
+      background: #0077cc;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav h2 {
+      margin: 0;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    nav ul li a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    form {
+      flex: 1 1 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    label {
+      font-weight: 600;
+    }
+    input[type=text], input[type=email], textarea {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      padding: 0.7rem 1rem;
+      font-weight: 600;
+      background: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    button[type="reset"] {
+      background: #d9534f;
+    }
+    button[type="reset"]:hover {
+      background: #b52b27;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+#resumePreview {
+  flex: 1 1 400px;
+  background: #0d1117; /* very dark navy/black */
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  box-sizing: border-box;
+  color: #e0e6f0; /* light, bright text */
+  min-height: 600px;
+  overflow-y: auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
+  position: relative;
+  border: none;
+}
+
+#resumePreview h2 {
+  margin-top: 0;
+  color: #58a6ff; /* bright cyan-blue */
+  font-weight: 700;
+  font-size: 2rem;
+  border-bottom: 2px solid #39a0ff;
+  padding-bottom: 0.3rem;
+  text-shadow: 0 0 6px #58a6ff99;
+}
+
+#resumePreview h3 {
+  color: #39a0ff;
+  font-weight: 600;
+  margin-top: 1.8rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  border-left: 4px solid #58a6ff;
+  padding-left: 0.75rem;
+  text-shadow: 0 0 4px #39a0ff99;
+}
+
+#resumePreview p,
+#resumePreview ul {
+  color: #c9d1d9; /* slightly softer than white */
+}
+
+#resumePreview ul {
+  padding-left: 1.25rem;
+}
+
+#resumePreview li {
+  margin-bottom: 0.35rem;
+}
+
+#resumePreview a {
+  color: #79c0ff;
+  text-decoration: none;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+#resumePreview a:hover {
+  color: #1f6feb;
+  text-decoration: underline;
+  text-shadow: 0 0 8px #1f6febcc;
+}
+
+#resumePreview img.photo {
+  float: right;
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-left: 1.5rem;
+  border: 4px solid #58a6ff;
+  box-shadow: 0 0 12px #58a6ffbb;
+}
+
+
+    #actionButtons {
+      max-width: 1000px;
+      margin: 1rem auto 3rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      #resumePreview img.photo {
+        float: none;
+        display: block;
+        margin: 0 auto 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h2>ResumePro</h2>
+  <ul>
+    <li><a href="#" onclick="switchSection('builder')">Resume Builder</a></li>
+    <li><a href="#" onclick="switchSection('samples')">Sample Resumes</a></li>
+    <li><a href="#" onclick="switchSection('roadmaps')">Job Roadmaps</a></li>
+  </ul>
+</nav>
+
+<h1 style="text-align:center; margin-top: 1rem;">Interactive Resume Builder</h1>
+
+<div class="container" id="builder" style="display:flex;">
+  <form id="resumeForm" autocomplete="off" spellcheck="false">
+    <label for="photo">Upload Photo</label>
+    <input type="file" id="photo" accept="image/*" />
+
+    <label for="name">Full Name *</label>
+    <input type="text" id="name" required />
+
+    <label for="email">Email *</label>
+    <input type="email" id="email" required />
+
+    <label for="phone">Phone Number *</label>
+    <input
+      type="text"
+      id="phone"
+      maxlength="10"
+      minlength="10"
+      pattern="\d{10}"
+      placeholder="1234567890"
+      required
+    />
+
+    <label for="college">College/University *</label>
+    <input type="text" id="college" required />
+
+    <label for="summary">Professional Summary *</label>
+    <textarea id="summary" rows="4" required></textarea>
+
+    <label for="skills">Skills (comma separated) *</label>
+    <input type="text" id="skills" required />
+
+    <label for="projectLinks">Project Links (comma separated)</label>
+    <input type="text" id="projectLinks" />
+
+    <label for="projectDescriptions">Project Descriptions (separate with "|||")</label>
+    <textarea id="projectDescriptions" rows="3"></textarea>
+
+    <div style="display:flex; gap:1rem; margin-top:1rem;">
+      <button type="submit">Generate Resume</button>
+      <button type="reset">Clear Form</button>
+    </div>
+  </form>
+
+  <section id="resumePreview" aria-live="polite" aria-atomic="true" role="region" aria-label="Resume Preview">
+    <!-- Preview content generated dynamically -->
+  </section>
+</div>
+
+<div class="container" id="samples" style="display:none;">
+  <div class="sample">
+    <h3>Software Engineer Resume</h3>
+    <p>Experienced in full-stack development with proficiency in JavaScript, React, Node.js, and MongoDB.</p>
+  </div>
+  <div class="sample">
+    <h3>Data Analyst Resume</h3>
+    <p>Skilled in SQL, Python, Tableau, and Excel. Adept at extracting insights from data and visualizing results.</p>
+  </div>
+</div>
+
+<div class="container" id="roadmaps" style="display:none;">
+  <div class="roadmap">
+    <h3>Frontend Developer Roadmap</h3>
+    <ul>
+      <li>HTML, CSS, JavaScript basics</li>
+      <li>Responsive design & Flexbox/Grid</li>
+      <li>React or Vue.js</li>
+      <li>Version control (Git & GitHub)</li>
+    </ul>
+  </div>
+  <div class="roadmap">
+    <h3>Machine Learning Engineer Roadmap</h3>
+    <ul>
+      <li>Python programming</li>
+      <li>Math for ML (Linear Algebra, Stats)</li>
+      <li>scikit-learn, TensorFlow, PyTorch</li>
+      <li>Projects & Kaggle Competitions</li>
+    </ul>
+  </div>
+</div>
+
+<div id="actionButtons">
+  <button onclick="saveToLocalStorage()">Save</button>
+  <button onclick="loadFromLocalStorage()">Load</button>
+  <button onclick="exportPDF()">Export as PDF</button>
+</div>
+
+<script>
+  // Section switcher
+  function switchSection(sectionId) {
+    ['builder', 'samples', 'roadmaps'].forEach(id => {
+      document.getElementById(id).style.display = (id === sectionId) ? (id === 'builder' ? 'flex' : 'block') : 'none';
+    });
+  }
+  switchSection('builder');
+
+  const form = document.getElementById('resumeForm');
+  const preview = document.getElementById('resumePreview');
+  const photoInput = document.getElementById('photo');
+
+  let photoDataURL = '';
+
+  // Preview the uploaded photo as DataURL to embed in preview and PDF
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    if (!file) {
+      photoDataURL = '';
+      generatePreview();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      photoDataURL = e.target.result;
+      generatePreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Validate phone number input (digits only, exactly 10)
+  form.phone.addEventListener('input', () => {
+    form.phone.value = form.phone.value.replace(/\D/g, '');
+    if (form.phone.value.length !== 10) {
+      form.phone.setCustomValidity('Phone number must be exactly 10 digits.');
+    } else {
+      form.phone.setCustomValidity('');
+    }
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (form.phone.value.length !== 10) {
+      form.phone.setCustomValidity('Phone number must be exactly 10 digits.');
+      form.reportValidity();
+      return;
+    }
+    form.phone.setCustomValidity('');
+    generatePreview();
+    alert('Resume preview updated!');
+  });
+
+  form.addEventListener('reset', () => {
+    preview.innerHTML = '';
+    photoDataURL = '';
+  });
+
+  function generatePreview() {
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const phone = form.phone.value.trim();
+    const college = form.college.value.trim();
+    const summary = form.summary.value.trim();
+    const skills = form.skills.value.trim();
+    const projectLinks = form.projectLinks.value.trim();
+    const projectDescriptions = form.projectDescriptions.value.trim();
+
+    if (!name || !email || !phone || !college || !summary || !skills) {
+      preview.innerHTML = "<p style='color:#d9534f; font-weight: 600;'>Please fill in all required fields to see the preview.</p>";
+      return;
+    }
+
+    const skillsArr = skills.split(',').map(s => s.trim()).filter(Boolean);
+    const linksArr = projectLinks ? projectLinks.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const descArr = projectDescriptions ? projectDescriptions.split('|||').map(s => s.trim()).filter(Boolean) : [];
+
+    let projectsHTML = '';
+    if (linksArr.length && descArr.length) {
+      projectsHTML = '<h3>Projects</h3><ul>';
+      for (let i = 0; i < Math.min(linksArr.length, descArr.length); i++) {
+        projectsHTML += `<li><a href="${linksArr[i]}" target="_blank" rel="noopener noreferrer">${linksArr[i]}</a>: ${descArr[i]}</li>`;
+      }
+      projectsHTML += '</ul>';
+    } else if (linksArr.length) {
+      projectsHTML = '<h3>Project Links</h3><ul>' + linksArr.map(link => `<li><a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a></li>`).join('') + '</ul>';
+    } else if (descArr.length) {
+      projectsHTML = '<h3>Project Descriptions</h3><ul>' + descArr.map(desc => `<li>${desc}</li>`).join('') + '</ul>';
+    }
+
+    preview.innerHTML = `
+      ${photoDataURL ? `<img class="photo" src="${photoDataURL}" alt="Photo of ${name}" />` : ''}
+      <h2>${name}</h2>
+      <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+      <p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>
+      <p><strong>College/University:</strong> ${college}</p>
+      <h3>Professional Summary</h3>
+      <p>${summary}</p>
+      <h3>Skills</h3>
+      <ul>${skillsArr.map(skill => `<li>${skill}</li>`).join('')}</ul>
+      ${projectsHTML}
+    `;
+  }
+
+  // Save form data including photo to localStorage
+  function saveToLocalStorage() {
+    const formData = {
+      photoDataURL,
+      name: form.name.value,
+      email: form.email.value,
+      phone: form.phone.value,
+      college: form.college.value,
+      summary: form.summary.value,
+      skills: form.skills.value,
+      projectLinks: form.projectLinks.value,
+      projectDescriptions: form.projectDescriptions.value,
+    };
+    localStorage.setItem('resumeFormData', JSON.stringify(formData));
+    alert('Form data saved locally.');
+  }
+
+  // Load form data and photo from localStorage
+  function loadFromLocalStorage() {
+    const savedData = localStorage.getItem('resumeFormData');
+    if (!savedData) {
+      alert('No saved data found.');
+      return;
+    }
+    const formData = JSON.parse(savedData);
+    photoDataURL = formData.photoDataURL || '';
+    if (photoDataURL) {
+      // Set photo preview, but can't set file input value programmatically
+      // So clear file input but preview the image on preview area
+      photoInput.value = '';
+    }
+    form.name.value = formData.name || '';
+    form.email.value = formData.email || '';
+    form.phone.value = formData.phone || '';
+    form.college.value = formData.college || '';
+    form.summary.value = formData.summary || '';
+    form.skills.value = formData.skills || '';
+    form.projectLinks.value = formData.projectLinks || '';
+    form.projectDescriptions.value = formData.projectDescriptions || '';
+    generatePreview();
+    alert('Form data loaded.');
+  }
+
+  async function exportPDF() {
+    if (!preview.innerHTML.trim()) {
+      alert('Please generate your resume first.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    try {
+      const canvas = await html2canvas(preview, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#fff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('resume.pdf');
+    } catch (error) {
+      alert('Failed to export PDF. Try again.');
+      console.error(error);
+    }
+  }
+</script>
+
+</body>
+</html>
